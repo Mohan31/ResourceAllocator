@@ -1,0 +1,71 @@
+Test Cases:
+
+Input : 
+
+Need atleast 42 CPU’s for 12 hrs 
+
+
+Output:
+hat.java/jdt_ws/ResourceAllocator_3da2a9b2/bin" Services.Test 12c94d7390cefa/red 
+*******************Test Run***********************
+Region : us-west
+Total Cost : 15600
+8xlarge : 1
+--------------------------------------------------------
+Region : asia
+Total Cost : 28320
+8xlarge : 2
+--------------------------------------------------------
+bash-3.2$
+
+
+input
+
+Need maximum number of cpu’s for 12 hours  for the price  400000.
+
+
+Output : 
+
+
+Region : us-east
+Total Cost : 139056
+large : 2
+xlarge : 2
+8xlarge : 2
+2xlarge : 2
+10xlarge : 2
+4xlarge : 2
+--------------------------------------------------------
+Region : us-west
+Total Cost : 137112
+large : 2
+8xlarge : 2
+2xlarge : 2
+10xlarge : 2
+4xlarge : 2
+--------------------------------------------------------
+Region : asia
+Total Cost : 51840
+large : 2
+xlarge : 2
+8xlarge : 2
+4xlarge : 2
+--------------------------------------------------------
+bash-3.2$
+
+
+
+
+Input:
+
+
+Need atleast 33 cpus for 2 hrs for the price 20000
+
+Output:
+
+
+Region : asia
+Total Cost : 7080
+8xlarge : 3
+--------------------------------------------------------
+
