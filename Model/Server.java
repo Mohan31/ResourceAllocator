@@ -13,14 +13,14 @@ public class Server {
                         has '0' hours_remaining then the status will become "Occupied".
     */
     private final String server_type;
-    private final float server_cost;
+    private final double server_cost;
     private final int number_of_cpu;
     private int hours_remaining;
     private final String region_name;
     private ServerStatus server_status;
 
 
-    public Server(String type, float cost, int cpus, int hours, String region_name){
+    public Server(String type, double cost, int cpus, int hours, String region_name){
 
         this.server_type = type;
         this.server_cost = cost;
@@ -46,7 +46,7 @@ public class Server {
         return this.number_of_cpu;
     }
 
-    public float get_server_cost(){
+    public double get_server_cost(){
 
         return this.server_cost;
     }

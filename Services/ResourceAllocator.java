@@ -28,8 +28,8 @@ public class ResourceAllocator {
 
             public int compare(Server server_a, Server server_b){
 
-                float cost_per_cpu_a = server_a.get_server_cost()/server_a.get_number_of_cpu();
-                float cost_per_cpu_b = server_b.get_server_cost()/server_b.get_number_of_cpu();
+                double cost_per_cpu_a = server_a.get_server_cost()/server_a.get_number_of_cpu();
+                double cost_per_cpu_b = server_b.get_server_cost()/server_b.get_number_of_cpu();
                 if(cost_per_cpu_a < cost_per_cpu_b) return -1;
                 if(cost_per_cpu_a > cost_per_cpu_b) return 1;
                 return 0;
@@ -88,7 +88,20 @@ public class ResourceAllocator {
 
     }
 
-    HashMap<String, ResultPair> GetCPU( int hours_requested, int cpu_requested, float price, Boolean is_price_constraint, Boolean is_cpu_constraint){
+    TreeMap<Double, HashMap<String, ResultPair>> sort_result_by_cost(HashMap<String, ResultPair> result){
+        
+        TreeMap<Double, HashMap<String, ResultPair>> sorted_result = new TreeMap<>();
+            
+        for(Map.Entry<String, ResultPair> result_entry : result.entrySet()){
+
+            HashMap<String, ResultPair> current_result = new HashMap<>();
+            current_result.put(result_entry.getKey(), result_entry.getValue());
+            sorted_result.put(result_entry.getValue().total_cost, current_result);
+        }
+
+        return sorted_result;
+    }
+    TreeMap<Double,HashMap<String, ResultPair>> GetCPU( int hours_requested, int cpu_requested, float price, Boolean is_price_constraint, Boolean is_cpu_constraint){
         
         int cpu_added = 0;
         HashMap<String, ResultPair> result =  new HashMap<>();
@@ -154,15 +167,15 @@ public class ResourceAllocator {
         // when both the price and number of cpu is a constraint
         if(is_cpu_constraint && is_price_constraint &&
             (cpu_added >= cpu_requested))
-             return result;
+             return sort_result_by_cost(result);
 
         //when the number of cpu is a contraint
         if(is_cpu_constraint && cpu_added >= cpu_requested)
-        return result;
+        return sort_result_by_cost(result);
 
         // when the price is a constraint
         if(is_price_constraint && !result.isEmpty())
-        return result;
+        return sort_result_by_cost(result);
         
         //if the customer request cannot be satisfied for the given constraint
         throw new RequestNotPossible("Request cannot be satisfied");

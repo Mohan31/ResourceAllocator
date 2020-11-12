@@ -6,13 +6,13 @@ import Exceptions.*;
 
 public class Test {
     
-    public static HashMap<String, ResultPair> result_map;
+    public static TreeMap<Double,HashMap<String, ResultPair>> response;
     
 
     Test(){
         
         System.out.println("*******************Test Run***********************");
-        result_map = new HashMap<>();
+        response = new TreeMap<>();
         
     }
     public static void main(String[] args) {
@@ -45,20 +45,22 @@ public class Test {
             resource_allocator.add_resource(server[i].get_region(), server[i]);
         
         try {
-            result_map = resource_allocator.GetCPU(22, 63, 20000 , true, true);
+            response = resource_allocator.GetCPU(6, Integer.MAX_VALUE, 400000 , true, false);
+            
         } catch (Exception e) {
             System.out.println(e.toString());
         }
-        
+            
+        for(Map.Entry<Double, HashMap<String, ResultPair>> response_entry : response.entrySet()){
 
-        for(Map.Entry<String, ResultPair> result_entry : result_map.entrySet()){
-
-            System.out.println("Region : " + result_entry.getKey());
-            System.out.println("Total Cost : " + result_entry.getValue().total_cost);  
-            for(Map.Entry<String, Integer> server_entry : result_entry.getValue().server_map.entrySet()){
-
-                System.out.println(server_entry.getKey() + " : " + server_entry.getValue());
+            for(Map.Entry<String, ResultPair> result_pair_entry : response_entry.getValue().entrySet()){
                 
+                System.out.println("Region : " + result_pair_entry.getKey());
+                System.out.println("Total Cost : " + result_pair_entry.getValue().total_cost);
+                for(Map.Entry<String, Integer> server_entry : result_pair_entry.getValue().server_map.entrySet()){
+
+                    System.out.println(server_entry.getKey() + " : " + server_entry.getValue());
+                } 
             }
 
             System.out.println("--------------------------------------------------------");

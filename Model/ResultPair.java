@@ -8,7 +8,7 @@ import java.util.*;
 */
 public class ResultPair{
 
-    public int total_cost;
+    public double total_cost;
     public HashMap<String,Integer> server_map;
     public ResultPair(){
 
