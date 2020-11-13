@@ -6,7 +6,7 @@ import Exceptions.*;
 
 public class Test {
     
-    public static TreeMap<Double,HashMap<String, ResultPair>> response;
+    public static TreeMap<Double,List<HashMap<String, ResultPair>>> response;
     
 
     Test(){
@@ -22,7 +22,7 @@ public class Test {
         
         ResourceAllocator resource_allocator = new ResourceAllocator();
        //@arg0 String type, @arg1 float cost, @arg2 int cpus, @arg3 int hours, @arg4 String region_name
-       
+            
         server[0] = new Server("large", 120, 1, 24, "us-east");
         server[1] = new Server("xlarge", 230, 2, 24, "us-east");
         server[2] = new Server("2xlarge", 450, 4, 24, "us-east");
@@ -40,20 +40,20 @@ public class Test {
         server[12] = new Server("xlarge", 200, 2, 24, "asia");
         server[13] = new Server("4xlarge", 670, 8, 24, "asia");
         server[14] = new Server("8xlarge", 1180, 16, 24, "asia");
- 
+
         for(int i = 0; i < 15;i++)
             resource_allocator.add_resource(server[i].get_region(), server[i]);
         
         try {
-            response = resource_allocator.GetCPU(6, Integer.MAX_VALUE, 400000 , true, false);
-            
+            response = resource_allocator.GetCPU(12, 42, Integer.MAX_VALUE , false, true);            
         } catch (Exception e) {
             System.out.println(e.toString());
         }
             
-        for(Map.Entry<Double, HashMap<String, ResultPair>> response_entry : response.entrySet()){
+        for(Map.Entry<Double, List<HashMap<String, ResultPair>>> response_entry : response.entrySet()){
 
-            for(Map.Entry<String, ResultPair> result_pair_entry : response_entry.getValue().entrySet()){
+            for(HashMap<String, ResultPair> result_list : response_entry.getValue())
+            for(Map.Entry<String, ResultPair> result_pair_entry : result_list.entrySet()){
                 
                 System.out.println("Region : " + result_pair_entry.getKey());
                 System.out.println("Total Cost : " + result_pair_entry.getValue().total_cost);

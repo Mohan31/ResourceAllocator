@@ -4,7 +4,28 @@ import Model.*;
 import Exceptions.*;
 
 public class ResourceAllocator {
+     
+    /*
+            creating a min_heap which sorts the servers across regions by cost per cpu/hour in
+            ascending order, so we will get the most cheapest cpu first which will give
+            
+            1. the customer more cpu if the constraint is on the "price" and "hours", as we are picking
+               the cheapest first. 
+            2. the customer cheapest price if the constraint is on the "cpu" and "hours"  
+    */
+    class ServerComparator implements Comparator<Server>{
 
+        @Override
+        public int compare(Server server_a, Server server_b){
+
+            double cost_per_cpu_a = server_a.get_server_cost()/server_a.get_number_of_cpu();
+            double cost_per_cpu_b = server_b.get_server_cost()/server_b.get_number_of_cpu();
+            if(cost_per_cpu_a < cost_per_cpu_b) return -1;
+            if(cost_per_cpu_a > cost_per_cpu_b) return 1;
+            return 0;
+
+        }    
+    }
     /*
         region_map - contains the existing regions.
         min_cost_queue - contains the servers sorted by cost per cpu/hour.
@@ -16,34 +37,15 @@ public class ResourceAllocator {
     ResourceAllocator(){
 
         region_map = new HashMap<>();
-        /*
-            creating a min_heap which sorts the servers across regions by cost per cpu/hour in
-            ascending order, so we will get the most cheapest cpu first which will give
-            
-            1. the customer more cpu if the constraint is on the "price" and "hours", as we are picking
-               the cheapest first. 
-            2. the customer cheapest price if the constraint is on the "cpu" and "hours"  
-        */
-        min_cost_queue = new PriorityQueue<>(new Comparator<Server>(){
-
-            public int compare(Server server_a, Server server_b){
-
-                double cost_per_cpu_a = server_a.get_server_cost()/server_a.get_number_of_cpu();
-                double cost_per_cpu_b = server_b.get_server_cost()/server_b.get_number_of_cpu();
-                if(cost_per_cpu_a < cost_per_cpu_b) return -1;
-                if(cost_per_cpu_a > cost_per_cpu_b) return 1;
-                return 0;
-
-            }
-            
-        });
+        min_cost_queue = new PriorityQueue<>(new ServerComparator());
     }
-
     /*
+       **********************************************************************************************************
         Adding resources/servers in the given region.
         Here, we are using the hash map "region_map" to find if
         the region is already existing, if yes we just add the servers to the region
         else we create a new region for the given region name and add that to the list of regions
+       **********************************************************************************************************       
     */
     void add_resource(String region_name, Server server){
 
@@ -87,24 +89,46 @@ public class ResourceAllocator {
         }
 
     }
+    /*
+       **********************************************************************************************************
+        using TreeMap to sort the result by cost, treemap by default sorts the
+        input by key in ascending order
+        TreeMap<Double, List<HashMap<String,      ResultPair>>>  arguments is used as given below
+        TreeMap<Cost,   List<HashMap<region_name, ResultPair>>>
 
-    TreeMap<Double, HashMap<String, ResultPair>> sort_result_by_cost(HashMap<String, ResultPair> result){
+        Maintaining the List<HashMap<region_name, ResultPair>> inside TreeMap because TreeMap does not allow
+        duplicate key, but we may get the same cost for multiple regions, so we are storing the
+        values as List, we check if the cost is already existing in the Map, if yes we just append the new result
+        else we create a new List and add that to the Map.
+       **********************************************************************************************************
+    */
+    TreeMap<Double, List<HashMap<String, ResultPair>>> sort_result_by_cost(HashMap<String, ResultPair> result){
         
-        TreeMap<Double, HashMap<String, ResultPair>> sorted_result = new TreeMap<>();
+        TreeMap<Double, List<HashMap<String, ResultPair>>> sorted_result = new TreeMap<>();
             
         for(Map.Entry<String, ResultPair> result_entry : result.entrySet()){
 
             HashMap<String, ResultPair> current_result = new HashMap<>();
             current_result.put(result_entry.getKey(), result_entry.getValue());
-            sorted_result.put(result_entry.getValue().total_cost, current_result);
+
+            // Condition to check for duplicate values.
+            if(sorted_result.containsKey(result_entry.getValue().total_cost))
+                sorted_result.get(result_entry.getValue().total_cost).add(current_result);      
+            else{
+
+                List<HashMap<String, ResultPair>> result_list = new LinkedList<>();
+                result_list.add(current_result);
+                sorted_result.put(result_entry.getValue().total_cost, result_list);
+            }
         }
 
         return sorted_result;
     }
-    TreeMap<Double,HashMap<String, ResultPair>> GetCPU( int hours_requested, int cpu_requested, float price, Boolean is_price_constraint, Boolean is_cpu_constraint){
+    TreeMap<Double,List<HashMap<String, ResultPair>>> GetCPU( int hours_requested, int cpu_requested, double price, Boolean is_price_constraint, Boolean is_cpu_constraint){
         
         int cpu_added = 0;
         HashMap<String, ResultPair> result =  new HashMap<>();
+        PriorityQueue<Server> current_queue_of_servers = new PriorityQueue<>(new ServerComparator());
         /*
         ******************************************************************************************************
         case 1 : The user request minimum of N cpu's for H hours
@@ -154,22 +178,22 @@ public class ResourceAllocator {
                     compute_result(server, result, cost_for_req_hours);
                 }
             }
-            //  adding the server back to queue with reduced hours, so it will be reused.
+            //adding the server back to queue with reduced hours, so it will be reused.
             if(server.get_hours_remaining() > 0)
-            this.min_cost_queue.add(server);
+            current_queue_of_servers.add(server);
             
             else if(server.get_hours_remaining() == 0)
             server.update_status(ServerStatus.Occupied);
         
         }
-        
-        
+        //updating the priority queue after assigning some servers to the customer.
+        this.min_cost_queue = current_queue_of_servers;
         // when both the price and number of cpu is a constraint
         if(is_cpu_constraint && is_price_constraint &&
             (cpu_added >= cpu_requested))
              return sort_result_by_cost(result);
 
-        //when the number of cpu is a contraint
+        // when the number of cpu is a contraint
         if(is_cpu_constraint && cpu_added >= cpu_requested)
         return sort_result_by_cost(result);
 
