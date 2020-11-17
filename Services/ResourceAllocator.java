@@ -17,7 +17,9 @@ public class ResourceAllocator {
 
         @Override
         public int compare(Server server_a, Server server_b){
-
+            
+            if(server_a.get_number_of_cpu == 0 || server_b.get_number_of_cpu == 0)
+                 throw new RuntimeException();
             double cost_per_cpu_a = server_a.get_server_cost()/server_a.get_number_of_cpu();
             double cost_per_cpu_b = server_b.get_server_cost()/server_b.get_number_of_cpu();
             if(cost_per_cpu_a < cost_per_cpu_b) return -1;
